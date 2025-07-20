@@ -58,8 +58,8 @@ export function SignIn(email: string, password: string, dispatch: AppDispatch) {
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
-      // const user = userCredential.user;
-      console.log(`email => ${email}, password => ${password}`);
+      const user = userCredential.user;
+      console.log(`email => ${email}, password => ${password}, uid => ${user.uid}`);
       // ...
     })
     .catch((error) => {
