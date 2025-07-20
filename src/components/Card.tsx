@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import { Unsubscribe } from "firebase/auth"
 import { auth, db } from "@/firebase/firebaseconfig"
 import { useEffect, useState } from "react"
@@ -63,7 +63,7 @@ export function CardWithForm() {
   let readUser: Unsubscribe;
   const getData = () => {
     const collectionRef = collection(db, "users");
-    console.log(`uid is this ${code}`)
+    console.log(`uid is this ${uid}`)
     const condition = where("uid", "==", uid)
     const q = query(collectionRef, condition);
     readUser = onSnapshot(q, (querySnapshot) => {
@@ -82,7 +82,7 @@ export function CardWithForm() {
       setName(userData[0]?.name || "")
       setCoins(userData[0]?.Coins || 0)
       setCountReferrals(userData[0]?.referralCount || 0)
-      console.log("Umair jamali", user);
+      console.log("Umair jamali", userData);
     });
   }
 

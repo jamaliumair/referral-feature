@@ -26,7 +26,7 @@ type UserObj = {
 };
 
 export const saveData = async (users: UserObj,
-   code: string | undefined,
+   code: string | null,
     ownerUid: string,
   referralDoc: DocumentData | null,
   ) => {

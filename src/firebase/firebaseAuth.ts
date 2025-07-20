@@ -1,9 +1,13 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+  signInWithPopup, GoogleAuthProvider
+} from "firebase/auth";
 import { auth, db } from "./firebaseconfig";
 import { saveData } from "./firebaseFirestore";
 import { AppDispatch } from "@/lib/store";
-import { collection, DocumentData, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { checkReferralCode, errorState, setUser } from "@/lib/slices/referraSlice";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 type checkCodeType = {
   error: boolean;
@@ -11,18 +15,28 @@ type checkCodeType = {
   referralDoc: DocumentData | null;
 }
 
+type UserType = {
+  name: string;
+  email: string;
+  isEmailVerified?: boolean;
+  uid: string;
+  coins: number;
+  countReferrals?: number;
+  referrals?: Array<{ name: string; email: string }>;
+  referredBy?: { uid: string };
+}
 export async function SignUp(
   name: string,
-   email: string,
-   password: string,
-   code: string | undefined,
+  email: string,
+  password: string,
+  code: string | null,
   dispatch: AppDispatch
 ) {
   let hasError: checkCodeType;
   if (code) {
-  hasError = await checkCode(code, dispatch);
-  if (hasError?.error) return;
-}
+    hasError = await checkCode(code, dispatch);
+    if (hasError?.error) return;
+  }
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed up 
@@ -40,7 +54,7 @@ export async function SignUp(
         )
       }
 
-     
+
       console.log(`data to be saved  => ${userObj}`)
       saveData(userObj, code, hasError?.ownerUid, hasError?.referralDoc)
       // ...
@@ -103,3 +117,49 @@ const checkCode = async (code: string, dispatch: AppDispatch): Promise<checkCode
   return { error: true, ownerUid: "", referralDoc: null };
 };
 
+
+const provider = new GoogleAuthProvider();
+export const SignInWithGoogle = (router: AppRouterInstance, code: string | null) => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      let user = result.user;
+      const userObj: UserType = {
+        uid: user.uid,
+        email: user.email ?? "",
+        name: user.displayName ?? "",
+        isEmailVerified: user.emailVerified ?? false,
+        coins: 0,
+        countReferrals: 0,
+        ...(code && {
+          referrals: []
+        }
+        )
+      }
+      const docRef = doc(db, 'users', user.uid)
+      checkingUserInDb(docRef, userObj)
+      router.push("/dashboard");
+    }).catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      // ...
+    });
+}
+
+async function checkingUserInDb(docRef: DocumentReference, user: UserType) {
+  const currentUser = await getDoc(docRef);
+  if (!currentUser.data()) {
+    createUser(docRef, user);
+  }
+}
+
+async function createUser(docRef: DocumentReference, user: UserType) {
+  await setDoc(docRef, {
+    user
+  })
+}

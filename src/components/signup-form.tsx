@@ -12,13 +12,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useState } from "react"
-import { SignUp } from "@/firebase/firebaseAuth"
+import { SignInWithGoogle, SignUp } from "@/firebase/firebaseAuth"
 import { useAppSelector } from "@/lib/hooks"
 import { useDispatch } from "react-redux"
+import { useRouter } from "next/navigation"
 
 type SignupFormProps = React.ComponentPropsWithoutRef<"div"> & {
   params?: {
-    slug? : string | undefined
+    slug? : string | null;
   };
 };
 
@@ -30,10 +31,11 @@ export function SignupForm({
   
   const error = useAppSelector((state) => state.referral.error);   
   const dispatch = useDispatch();
+  const router = useRouter();
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [name,setName] = useState("");
-  const referralCode: string | undefined = params?.slug;
+  const referralCode: string | null = params?.slug ?? null;
   console.log(referralCode)
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -87,12 +89,15 @@ export function SignupForm({
               </Button>
               <p className="text-red-600">{error}
               </p>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={(e) => {
+                e.preventDefault();
+                SignInWithGoogle(router, referralCode)
+              }}>
                 Signup with Google
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              Alreaday Have an Account ?{" "}
               <Link href="./login" className="underline underline-offset-4">
                 Login
               </Link>

@@ -11,10 +11,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { SignIn } from "@/firebase/firebaseAuth"
+import { SignIn, SignInWithGoogle } from "@/firebase/firebaseAuth"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "@/lib/hooks"
+import { useRouter } from "next/navigation"
 
 
 export function LoginForm({
@@ -22,6 +23,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
     const dispatch = useDispatch();
+    const router = useRouter();
     const error = useAppSelector((state) => state.referral.error);
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
@@ -72,7 +74,10 @@ export function LoginForm({
                 </Button>
                 <p className="text-red-600">{error}
               </p>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={(e) => {
+                  e.preventDefault();
+                  SignInWithGoogle(router, null)
+                }}>
                   Login with Google
                 </Button>
             </div>
