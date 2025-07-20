@@ -2,13 +2,13 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { auth, db } from "./firebaseconfig";
 import { saveData } from "./firebaseFirestore";
 import { AppDispatch } from "@/lib/store";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, DocumentData, getDocs, query, where } from "firebase/firestore";
 import { checkReferralCode, errorState, setUser } from "@/lib/slices/referraSlice";
 
 type checkCodeType = {
   error: boolean;
   ownerUid: string;
-  referralDoc: any;
+  referralDoc: DocumentData | null;
 }
 
 export async function SignUp(
@@ -48,6 +48,7 @@ export async function SignUp(
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
+      console.log("errorCode => ", errorCode);
       dispatch(errorState(errorMessage));
       // ..
     });
@@ -57,13 +58,14 @@ export function SignIn(email: string, password: string, dispatch: AppDispatch) {
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
-      const user = userCredential.user;
+      // const user = userCredential.user;
       console.log(`email => ${email}, password => ${password}`);
       // ...
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
+      console.log("errorCode => ", errorCode);
       dispatch(errorState(errorMessage));
 
     });
@@ -76,6 +78,7 @@ export function SignOut(dispatch: AppDispatch) {
     dispatch(setUser(null));
   }).catch((error) => {
     // An error happened.
+    console.log("error signing out => ", error.message);
   });
 }
 

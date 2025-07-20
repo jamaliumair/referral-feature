@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { collection, doc, query, where, onSnapshot, getDocs } from "firebase/firestore";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { Unsubscribe } from "firebase/auth"
 import { auth, db } from "@/firebase/firebaseconfig"
 import { useEffect, useState } from "react"
@@ -47,7 +47,7 @@ export function CardWithForm() {
 
   // referralCode = generateRandomCode(6); // e.g., 'A1B2C3'
   const referralLink = `http://localhost:3000/auth/signup/${code}`
-  let uid = auth?.currentUser?.uid;
+  const uid = auth?.currentUser?.uid;
   useEffect(() => {
     if (!uid) return;
     setCode(generateReferralCode())
@@ -67,7 +67,7 @@ export function CardWithForm() {
     const condition = where("uid", "==", uid)
     const q = query(collectionRef, condition);
     readUser = onSnapshot(q, (querySnapshot) => {
-      let userData: userType[] = querySnapshot.docs.map((userDoc) => {
+      const userData: userType[] = querySnapshot.docs.map((userDoc) => {
         const data = userDoc.data();
         console.log("user data => ,", data);
         return {
@@ -79,10 +79,10 @@ export function CardWithForm() {
         };
       });
       setUser(userData);
-      setName(userData[0]?.name!)
-      setCoins(userData[0]?.Coins!)
-      setCountReferrals(userData[0]?.referralCount!)
-      console.log("Umair jamali", userData)
+      setName(userData[0]?.name || "")
+      setCoins(userData[0]?.Coins || 0)
+      setCountReferrals(userData[0]?.referralCount || 0)
+      console.log("Umair jamali", user);
     });
   }
 

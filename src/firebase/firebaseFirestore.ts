@@ -1,8 +1,16 @@
 "use client"
-import { collection, addDoc, setDoc, doc, query, where, onSnapshot, updateDoc, increment, getDocs, arrayUnion, serverTimestamp } from "firebase/firestore";
+import 
+{ collection, 
+  addDoc, 
+  setDoc, 
+  doc, 
+  updateDoc, 
+  increment, 
+  arrayUnion, 
+  serverTimestamp, 
+  DocumentData} 
+from "firebase/firestore";
 import { db } from "./firebaseconfig";
-import type { AppDispatch } from "@/lib/store"; // Adjust the path to your store file
-import { checkReferralCode, errorState } from "@/lib/slices/referraSlice";
 
 type ReferredUser = {
   name: string;
@@ -20,7 +28,7 @@ type UserObj = {
 export const saveData = async (users: UserObj,
    code: string | undefined,
     ownerUid: string,
-  referralDoc: any,
+  referralDoc: DocumentData | null,
   ) => {
   try {
     const uid = users.uid;
@@ -50,7 +58,7 @@ export const saveData = async (users: UserObj,
           console.log("Referring User Updated Successfully");
 
 
-          await updateDoc(referralDoc.ref, {
+          await updateDoc(referralDoc?.ref, {
             usedCount: increment(1)
           });
           return;
