@@ -50,7 +50,7 @@ export function CardWithForm() {
   const uid = auth?.currentUser?.uid;
  
 
-  let readUser = useRef<Unsubscribe | null>(null)
+  const readUser = useRef<Unsubscribe | null>(null)
   const getData = useCallback(() => {
     const collectionRef = collection(db, "users");
     console.log(`uid is this ${uid}`)
