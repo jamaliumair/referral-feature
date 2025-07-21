@@ -123,7 +123,7 @@ export const SignInWithGoogle = (router: AppRouterInstance, code: string | null)
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
-      let user = result.user;
+      const user = result.user;
       const userObj: UserType = {
         uid: user.uid,
         email: user.email ?? "",

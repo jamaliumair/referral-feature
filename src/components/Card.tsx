@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { Unsubscribe } from "firebase/auth"
 import { auth, db } from "@/firebase/firebaseconfig"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Check, Copy as CopyIcon } from "lucide-react"
 import { createReferralCode } from "@/firebase/firebaseFirestore"
 import { SignOut } from "@/firebase/firebaseAuth"
@@ -48,25 +48,15 @@ export function CardWithForm() {
   // referralCode = generateRandomCode(6); // e.g., 'A1B2C3'
   const referralLink = `http://localhost:3000/auth/signup/${code}`
   const uid = auth?.currentUser?.uid;
-  useEffect(() => {
-    if (!uid) return;
-    setCode(generateReferralCode())
-    getData();
-    return () => {
-      if (readUser) {
-        console.log("component unmount")
-        readUser();
-      }
-    }
-  }, [uid])
+ 
 
-  let readUser: Unsubscribe;
-  const getData = () => {
+  let readUser = useRef<Unsubscribe | null>(null)
+  const getData = useCallback(() => {
     const collectionRef = collection(db, "users");
     console.log(`uid is this ${uid}`)
     const condition = where("uid", "==", uid)
     const q = query(collectionRef, condition);
-    readUser = onSnapshot(q, (querySnapshot) => {
+    readUser.current = onSnapshot(q, (querySnapshot) => {
       const userData: userType[] = querySnapshot.docs.map((userDoc) => {
         const data = userDoc.data();
         console.log("user data => ,", data);
@@ -82,10 +72,21 @@ export function CardWithForm() {
       setName(userData[0]?.name || "")
       setCoins(userData[0]?.Coins || 0)
       setCountReferrals(userData[0]?.referralCount || 0)
-      console.log("Umair jamali", userData);
+      console.log("Umair jamali", user);
     });
-  }
+  }, [uid]);
 
+ useEffect(() => {
+    if (!uid) return;
+    setCode(generateReferralCode())
+    getData();
+    return () => {
+      if (readUser.current) {
+        console.log("component unmount")
+        readUser.current();
+      }
+    }
+  }, [uid, getData])
   
   const handleCopy = async() => {
     setCode(generateReferralCode())
