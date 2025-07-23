@@ -5,7 +5,7 @@ import {
 import { auth, db } from "./firebaseconfig";
 import { saveData } from "./firebaseFirestore";
 import { AppDispatch } from "@/lib/store";
-import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, where } from "firebase/firestore";
 import { checkReferralCode, errorState, setUser } from "@/lib/slices/referraSlice";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
@@ -128,8 +128,6 @@ export const SignInWithGoogle = async (router: AppRouterInstance, code: string |
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
-       const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential ? credential.accessToken: null;
       const user = result.user;
       const userObj: UserType = {
         uid: user.uid,
