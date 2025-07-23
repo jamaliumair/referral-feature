@@ -16,14 +16,12 @@ type checkCodeType = {
 }
 
 type UserType = {
-  name: string;
-  email: string;
-  isEmailVerified?: boolean;
-  uid: string;
-  coins: number;
-  countReferrals?: number;
-  referrals?: Array<{ name: string; email: string }>;
-  referredBy?: { uid: string };
+  name: string,
+  email: string,
+  uid: string,
+  isEmailVerified: boolean,
+  coins: number,
+  countReferrals: number,
 }
 export async function SignUp(
   name: string,
@@ -119,10 +117,19 @@ const checkCode = async (code: string, dispatch: AppDispatch): Promise<checkCode
 
 
 const provider = new GoogleAuthProvider();
-export const SignInWithGoogle = (router: AppRouterInstance, code: string | null) => {
+export const SignInWithGoogle = async (router: AppRouterInstance, code: string | null, dispatch: AppDispatch) => {
+
+  let hasError: checkCodeType;
+  if (code) {
+    hasError = await checkCode(code, dispatch);
+    if (hasError?.error) return;
+  }
+
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
+       const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential ? credential.accessToken: null;
       const user = result.user;
       const userObj: UserType = {
         uid: user.uid,
@@ -137,30 +144,27 @@ export const SignInWithGoogle = (router: AppRouterInstance, code: string | null)
         )
       }
       const docRef = doc(db, 'users', user.uid)
-      checkingUserInDb(docRef, userObj)
+      checkingUserInDb(docRef, userObj, code, hasError)
       router.push("/dashboard");
     }).catch((error) => {
-    console.error("error occured => ", error.code);
-    // // Handle Errors here.
-    // const errorCode = error.code;
-    // const errorMessage = error.message;
-    // // The email of the user's account used.
-    // const email = error.customData.email;
+      // // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // // The email of the user's account used.
+      const email = error.customData.email;
+      console.error("error code => ", errorCode, "error message => ", errorMessage, "email => ", email);
     // // The AuthCredential type that was used.
     // const credential = GoogleAuthProvider.credentialFromError(error);
     // // ...
     });
 }
 
-async function checkingUserInDb(docRef: DocumentReference, user: UserType) {
+async function checkingUserInDb(docRef: DocumentReference, 
+  user: UserType, 
+  code: string | null, 
+  hasError: checkCodeType) {
   const currentUser = await getDoc(docRef);
   if (!currentUser.data()) {
-    createUser(docRef, user);
+      saveData(user, code, hasError?.ownerUid, hasError?.referralDoc)
   }
-}
-
-async function createUser(docRef: DocumentReference, user: UserType) {
-  await setDoc(docRef, {
-    user
-  })
 }

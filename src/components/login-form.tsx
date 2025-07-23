@@ -67,16 +67,16 @@ export function LoginForm({
                 />
               </div>
                 <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" onClick={(e) => {
+                <Button type="submit" className="w-full cursor-pointer" onClick={(e) => {
                   e.preventDefault();
                   SignIn(email,password, dispatch)}}>
                   Login
                 </Button>
                 <p className="text-red-600">{error}
               </p>
-                <Button variant="outline" className="w-full" onClick={(e) => {
+                <Button variant="outline" className="w-full cursor-pointer" onClick={(e) => {
                   e.preventDefault();
-                  SignInWithGoogle(router, null)
+                  SignInWithGoogle(router, null, dispatch)
                 }}>
                   Login with Google
                 </Button>

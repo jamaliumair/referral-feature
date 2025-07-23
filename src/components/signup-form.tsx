@@ -81,7 +81,7 @@ export function SignupForm({
                 value={password}
                 />
               </div>
-              <Button type="submit" className="w-full" onClick={(e) => {
+              <Button type="submit" className="w-full cursor-pointer" onClick={(e) => {
                 e.preventDefault();
                 SignUp(name, email,password, referralCode, dispatch)
                 }}>
@@ -89,9 +89,9 @@ export function SignupForm({
               </Button>
               <p className="text-red-600">{error}
               </p>
-              <Button variant="outline" className="w-full" onClick={(e) => {
+              <Button variant="outline" className="w-full cursor-pointer" onClick={(e) => {
                 e.preventDefault();
-                SignInWithGoogle(router, referralCode)
+                SignInWithGoogle(router, referralCode, dispatch)
               }}>
                 Signup with Google
               </Button>
